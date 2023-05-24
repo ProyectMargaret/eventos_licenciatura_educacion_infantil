@@ -7,7 +7,7 @@ library(readxl)
 
 source(here("data","files.R"))
 
-data1 <- read_csv(file1) |> 
+data <- read_csv(file1) |> 
   mutate(enlace = str_remove(enlace, ".*file/d/"),
          enlace = str_remove(enlace, "/view?.*"),
          enlace = str_c("https://drive.google.com/uc?id=",enlace,"&export=download&authuser=0"),
@@ -16,14 +16,14 @@ data1 <- read_csv(file1) |>
                        ">Download</a>")) |> 
   select(nombre,cedula,enlace,certificado)
 
-data2 <- read_csv(file2) |> 
+data2 <- read_csv(file2) |>
   mutate(enlace = str_remove(enlace, ".*file/d/"),
          enlace = str_remove(enlace, "/view?.*"),
          enlace = str_c("https://drive.google.com/uc?id=",enlace,"&export=download&authuser=0"),
          enlace= str_c("<a href=",
                        enlace,
                        ">Download</a>"),
-         certificado = "IV Encuentro Nacional de Semilleros de Investigación") |> 
+         certificado = "IV Encuentro Nacional de Semilleros de Investigación") |>
   select(nombre, cedula,enlace,certificado)
 
 data <- rbind(data1, data2)
