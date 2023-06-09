@@ -1,0 +1,13 @@
+name: eventos_licenciatura_educacion_infantil
+title: eventos_licenciatura_educacion_infantil
+username:
+account: licenciaturaeducacioninfantil
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 9238649
+bundleId: 7299117
+url: https://licenciaturaeducacioninfantil.shinyapps.io/eventos_licenciatura_educacion_infantil/
+when: 1685756085.41033
+lastSyncTime: 1685756085.41035
+asMultiple: FALSE
+asStatic: FALSE
