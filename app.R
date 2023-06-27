@@ -1,24 +1,31 @@
 library(shiny)
 library(shinydashboard)
 library(tidyverse)
-library(here)
 library(DT)
-library(readxl)
+library(readr)
+library(googlesheets4)
 
-# Cargar los datos directamente en el código
-data <- data.frame(nombre = c("Nombre 1", "Nombre 2"),
-                   cedula = c("1234567890", "0987654321"),
-                   enlace = c("https://drive.google.com/uc?id=XXXXX&export=download&authuser=0",
-                              "https://drive.google.com/uc?id=YYYYY&export=download&authuser=0"),
-                   certificado = c("Certificado 1", "Certificado 2"))
-
-data2 <- data.frame(nombre = c("Nombre 3", "Nombre 4"),
-                    cedula = c("1111111111", "2222222222"),
-                    enlace = c("https://drive.google.com/uc?id=ZZZZZ&export=download&authuser=0",
-                               "https://drive.google.com/uc?id=WWWWW&export=download&authuser=0"),
-                    certificado = c("Certificado 3", "Certificado 4"))
-
-data <- rbind(data, data2)
+  valueFunc = function() {
+    # Leer los datos del archivo CSV y realizar las transformaciones necesarias
+    file1 <- "https://docs.google.com/spreadsheets/d/17_zntQUfFJ9UZFnqu1dyGoJqQHvl8D6iSRdH0N4X0os/export?format=csv&gid=0"
+    data1 <- read_csv(file1) |> 
+      mutate(enlace = str_remove(enlace, ".*file/d/"),
+             enlace = str_remove(enlace, "/view?.*"),
+             enlace = str_c("https://drive.google.com/uc?id=", enlace, "&export=download&authuser=0"),
+             enlace = str_c("<a href=", enlace, ">Download</a>")) |> 
+      select(nombre, cedula, enlace, certificado)
+    
+    file2 <- "https://docs.google.com/spreadsheets/d/17_zntQUfFJ9UZFnqu1dyGoJqQHvl8D6iSRdH0N4X0os/export?format=csv&gid=959430914"
+    
+    data2 <- read_csv(file2) |>
+      mutate(enlace = str_remove(enlace, ".*file/d/"),
+             enlace = str_remove(enlace, "/view?.*"),
+             enlace = str_c("https://drive.google.com/uc?id=", enlace, "&export=download&authuser=0"),
+             enlace = str_c("<a href=", enlace, ">Download</a>")) |>
+      select(nombre, cedula, enlace, certificado)
+    
+    rbind(data1, data2)
+  }
 
 ui <- dashboardPage(skin = "yellow",
                     dashboardHeader(title = "Vicerrectoría de Investigaciones", titleWidth = 350,
@@ -47,16 +54,16 @@ ui <- dashboardPage(skin = "yellow",
                     ),
                     dashboardBody(style = "background-color: #ffffff",
                                   fluidPage(
-                                    fluidRow(column(4, align="left", offset = 1, 
-                                                    a(href="https://www.funlam.edu.co/",
-                                                      img(src="banner.jpeg", height=200, width=500), 
-                                                      target="_blank")),
-                                             column(4, align="center", offset = 1, 
-                                                    a(href="https://www.funlam.edu.co/modules/centroinvestigaciones/", 
-                                                      img(src="logo.jpg", height=150, width=200),
-                                                      target="_blank"))),
+                                    fluidRow(column(4, align = "left", offset = 1, 
+                                                    a(href = "https://www.funlam.edu.co/",
+                                                      img(src = "banner.jpeg", height = 200, width = 500), 
+                                                      target = "_blank")),
+                                             column(4, align = "center", offset = 1, 
+                                                    a(href = "https://www.funlam.edu.co/modules/centroinvestigaciones/", 
+                                                      img(src = "logo.jpg", height = 150, width = 200),
+                                                      target = "_blank"))),
                                     fluidRow(
-                                      column(8, align="center", offset = 2,
+                                      column(8, align = "center", offset = 2,
                                              textInput("txt", "Ingrese Número de Identificación"),
                                              actionButton("button", "Buscar")
                                       ),
@@ -67,7 +74,7 @@ ui <- dashboardPage(skin = "yellow",
                     )
 )
 
-server <- function(input, output) {
+server <- function(input, output, session) {
   
   output$Certificados <- renderMenu({
     menuItem("Certificados", icon = icon("book-open"))
@@ -79,7 +86,7 @@ server <- function(input, output) {
   )
   
   output$salida <- renderDT({
-    data %>%
+    valueFunc() %>%
       filter(cedula == dato()) %>%
       datatable(escape = FALSE,
                 options = list(dom = 't'),
